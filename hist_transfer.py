@@ -42,3 +42,33 @@ def transfer(from_im, to_im):
         mapping[i] = xj
     v_map = np.vectorize(lambda x: mapping[x])
     return v_map(to_im)
+
+def transfer_rgb(from_im, to_im):
+    result = to_im.copy()
+    for i in [0,1,2]:
+        result[:,:,i] = transfer(from_im[:,:,i], to_im[:,:,i])
+    return result
+
+
+def transfer_using_colorspace(from_im, to_im, colorspace_f, colorspace_r):
+    from_im_cvt = cv2.cvtColor(from_im, colorspace_f)
+    to_im_cvt = cv2.cvtColor(to_im, colorspace_f)
+    result = to_im_cvt.copy()
+    for i in [0,1,2]:
+        result[:,:,i] = transfer(from_im_cvt[:,:,i], to_im_cvt[:,:,i])
+    return cv2.cvtColor(result, colorspace_r)
+
+def transfer_hsv(from_im, to_im, hue=True, saturation=True, value=True):
+    from_im_hsv = cv2.cvtColor(from_im, cv2.COLOR_BGR2HSV)
+    to_im_hsv = cv2.cvtColor(to_im, cv2.COLOR_BGR2HSV)
+    result = to_im_hsv.copy()
+    channels = []
+    if hue:
+        channels.append(0)
+    if saturation:
+        channels.append(1)
+    if value:
+        channels.append(2)
+    for i in channels:
+        result[:,:,i] = transfer(from_im_hsv[:,:,i], to_im_hsv[:,:,i])
+    return cv2.cvtColor(result, cv2.COLOR_HSV2BGR)
