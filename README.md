@@ -6,13 +6,13 @@ technique on the channels of an image. Example outputs are shown below.
 
 Transferring style from:
 
-![ from image ]('examples/ny_from.jpg')
+![ from image ](examples/ny_from.jpg)
 
 To this image:
 
-![to image]('examples/ny_to.jpg')
+![to image](examples/ny_to.jpg)
 
 Results in :
-![New York result]('examples/ny_lab.jpg')
+![New York result](examples/ny_lab.jpg)
 
 
