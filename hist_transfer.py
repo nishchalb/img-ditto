@@ -44,7 +44,8 @@ def transfer(from_im, to_im):
         xj = round(xj)
         mapping[i] = xj
     v_map = np.vectorize(lambda x: mapping[x])
-    return v_map(to_im)
+    result = v_map(to_im)
+    return result 
 
 def transfer_rgb(from_im, to_im, strength=1.0):
     result = to_im.copy()
@@ -103,12 +104,13 @@ def main():
             '-c', 
             '--colorspace', 
             help="""The colorspace to use for the transformation. Currently
-                    supported are rgb, hsv, and lab. Defaults to hsv.""",
-            default='hsv'
+                    supported are rgb, hsv, and lab. Defaults to lab.""",
+            default='lab'
             )
 
     args = parser.parse_args()
-    input_name, _,input_ext = args.from_im.partition('.') 
+    input_split = args.from_im.split('/')
+    input_name, _,input_ext = input_split[-1].partition('.') 
     from_im = cv2.imread(args.from_im)
     if args.output is None:
         suffix = "_styled_like_{}".format(input_name)
@@ -126,7 +128,9 @@ def main():
                     strength = args.strength)
         else:
             result = transfer_hsv(from_im, to_im, strength = args.strength)
-        out_name, _, out_ext = img.partition('.')
+        out_split = img.split('/')
+        out_name, _, out_ext = out_split[-1].partition('.')
+        print '{}{}.{}'.format(out_name, suffix, out_ext)
         cv2.imwrite('{}{}.{}'.format(out_name, suffix, out_ext), result)
 
 if __name__ == "__main__":
