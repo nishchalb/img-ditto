@@ -4,6 +4,7 @@ allows you to transfer the color style from one image to another. It works by
 using the [histogram matching](https://en.wikipedia.org/wiki/Histogram_matching)
 technique on the channels of an image. Example outputs are shown below.
 
+## Example Results
 Transferring style from:
 
 ![ from image ](examples/ny_from.jpg)
@@ -36,4 +37,6 @@ To this image:
 
 Results in :
 ![portrait result](examples/portrait_lab.jpg)
+
+## Installation
 
