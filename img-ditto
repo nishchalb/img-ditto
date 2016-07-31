@@ -28,8 +28,7 @@ from scipy.interpolate import interp1d
 import argparse
 
 def est_cdf(X):
-    """ Returns a function representing the cdf of the input image, as well as
-            the inverse of that function
+    """ Returns a function representing the cdf of the input image
 
     Args:
         X (np.ndarray): A 2-dimensional numpy array representing an image
@@ -54,9 +53,12 @@ def transfer(from_im, to_im):
     Returns:
         np.ndarray: The new values for to_im
     """
+    # Get the cdf's for each array, as well as the inverse cdf for the from_im
     F = est_cdf(to_im)
     G = est_cdf(from_im)
     G_inv = np.interp(F.y, G.y, G.x, left=0.0, right=1.0)
+
+    # Figure out how to map olf values to new values
     mapping = {}
     x_range = np.arange(256)
     for n, i in enumerate(x_range):
@@ -64,11 +66,24 @@ def transfer(from_im, to_im):
         xj = G_inv[n]
         xj = round(xj)
         mapping[i] = xj
+
+    # Apply the mapping
     v_map = np.vectorize(lambda x: mapping[x])
     result = v_map(to_im)
     return result 
 
 def transfer_rgb(from_im, to_im, strength=1.0):
+    """ Transfer the histogram from RGB images from_im to to_im
+
+    Args:
+        from_im (np.ndarray): A 3-dimensional numpy array representing an RGB image
+        to_im (np.ndarray): A 3-dimensional numpy array representing an RGB image
+        strength (float, optional): A number between 0.0 and 1.0 representing
+            how strong the resulting transfer should be. Defaults to 1.0
+
+    Returns:
+        np.ndarray: The resulting image from applying the transfer
+    """
     result = to_im.copy()
     for i in [0,1,2]:
         result[:,:,i] = transfer(from_im[:,:,i], to_im[:,:,i])
@@ -76,6 +91,24 @@ def transfer_rgb(from_im, to_im, strength=1.0):
 
 
 def transfer_using_colorspace(from_im, to_im, colorspace_f, colorspace_r, strength = 1.0):
+    """ Transfer the histogram images from_im to to_im using specified colorspace
+
+    Args:
+        from_im (np.ndarray): A 3-dimensional numpy array representing an RGB image
+        to_im (np.ndarray): A 3-dimensional numpy array representing an RGB image
+        colorspace_f (long): A long specifying the colorspace conversion to use.
+            It is recommended to use OpenCV constants for this e.g. 
+            cv2.COLOR_BGR2LAB. The function will use this to convert the input
+            images to an intermediate representation in the given colorspace.
+        colorspace_r (long): A long specifying the colorspace conversion to 
+            perform after the hisogram transfer has occured. Again, it is
+            recommended to use OpenCV constants.
+        strength (float, optional): A number between 0.0 and 1.0 representing
+            how strong the resulting transfer should be. Defaults to 1.0
+
+    Returns:
+        np.ndarray: The resulting image from applying the transfer
+    """
     from_im_cvt = cv2.cvtColor(from_im, colorspace_f)
     to_im_cvt = cv2.cvtColor(to_im, colorspace_f)
     result = to_im_cvt.copy()
@@ -84,6 +117,21 @@ def transfer_using_colorspace(from_im, to_im, colorspace_f, colorspace_r, streng
     return cv2.cvtColor(result, colorspace_r)*strength + to_im * (1 - strength)
 
 def transfer_hsv(from_im, to_im, hue=True, saturation=True, value=True, strength = 1.0):
+    """ Transfer the histogram from HSV images from_im to to_im
+
+    Args:
+        from_im (np.ndarray): A 3-dimensional numpy array representing an HSV image
+        to_im (np.ndarray): A 3-dimensional numpy array representing an HSV image
+        hue (bool, optional): Whether to transfer the hue channel. Defaults to True.
+        saturation (bool, optional): Whether to transfer the saturation channel. 
+            Defaults to True.
+        value (bool, optional): Whether to transfer the value channel. Defaults to True.
+        strength (float, optional): A number between 0.0 and 1.0 representing
+            how strong the resulting transfer should be. Defaults to 1.0
+
+    Returns:
+        np.ndarray: The resulting image from applying the transfer
+    """
     from_im_hsv = cv2.cvtColor(from_im, cv2.COLOR_BGR2HSV)
     to_im_hsv = cv2.cvtColor(to_im, cv2.COLOR_BGR2HSV)
     result = to_im_hsv.copy()
